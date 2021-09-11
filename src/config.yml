@@ -1,0 +1,7 @@
+world_name: world
+generation:
+  #Those values wont normally crash your server but if it does you should decrease the values below
+  #If you want task to be faster you can increase values as it fit to you
+  chunks_indexation_per_tick: 40
+  chunks_clears_per_tick: 3
+  chunks_planted_per_tick: 5

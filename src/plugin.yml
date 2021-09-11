@@ -1,0 +1,7 @@
+name: RoofedMaker
+main: fr.thugmonkeymc.roofedmaker.main.Main
+author: ThugMonkeyMC
+version: 1.0.0
+commands: 
+  forestgen:
+    permission: forestgen
