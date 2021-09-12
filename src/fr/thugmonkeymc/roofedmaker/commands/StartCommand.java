@@ -26,6 +26,7 @@ import net.md_5.bungee.api.ChatColor;
 public class StartCommand implements CommandExecutor {
 	
 	private static String WORLD_NAME = "world";
+	private static boolean DEBUG_MODE = false;
 	private final List<List<Integer>> integersList = new ArrayList<List<Integer>>();
 	private final List<Chunk> chunks = new ArrayList<Chunk>();
 	private final List<Chunk> treesChunks = new ArrayList<Chunk>();
@@ -43,16 +44,19 @@ public class StartCommand implements CommandExecutor {
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		System.out.println("Starting map clear...");
+		this.stats = new Stats();
+		log("Starting map clear...");
 		if(args.length == 1) {
 			radius = Integer.parseInt(args[0]);
-			System.out.println("radius is now " + radius);
+			log("Forest's radius is now " + radius);
 			toClear = radius + 50;
 		}
 		stats.setStartTime(System.currentTimeMillis());
 		this.state = State.STARTING;
 		clearMap();
+		
 		StartCommand.WORLD_NAME = this.main.getConfig().getString("world_name");
+		StartCommand.DEBUG_MODE = this.main.getConfig().getBoolean("debug_mode");
 		
 		if(sender instanceof Player) {
 			this.player = (Player) sender;
@@ -72,17 +76,17 @@ public class StartCommand implements CommandExecutor {
 	}
 	
 	private void clearMap() {
-		System.out.println("Stocking chunks start");
+		log("Stocking chunks start");
 		this.state = State.COUNTING;
 		for(int x = -toClear; x < toClear; x+=16) {
 			for(int z = -toClear; z < toClear; z+=16) {
-				System.out.println("  added x:" + x + " z:" + z);
+				debug("  added x:" + x + " z:" + z);
 				integersList.add(Arrays.asList(x, z));
 				totalChunks = integersList.size();
 			}
 		}
-		System.out.println("Stocked chunks");
-		System.out.println("Loading all chunks...");
+		log("Stocked chunks");
+		log("Loading all chunks...");
 		convertChunks();
 	}
 	
@@ -100,18 +104,18 @@ public class StartCommand implements CommandExecutor {
 					}			
 					
 					Chunk chunk = Bukkit.getWorld(WORLD_NAME).getChunkAt(integersList.get(0).get(0), integersList.get(0).get(1));
-					System.out.println("  loading chunk x:" + chunk.getX() + " z:" + chunk.getZ());
+					debug("  loading chunk x:" + chunk.getX() + " z:" + chunk.getZ());
 					integersList.remove(0);
 					chunks.add(chunk);
 				}
 			}
 		}.runTaskTimer(main, 0, 1);
 		
-		System.out.println("Loaded all chunks");
+		log("Loaded all chunks");
 	}
 	
 	private void startClearChunks() {
-		System.out.println("Started map clear !");
+		log("Started map clear !");
 		this.state = State.CLEARING;
 		Bukkit.getWorld(WORLD_NAME).setGameRuleValue("randomTickSpeed", "500");
 		Bukkit.getWorld(WORLD_NAME).setGameRuleValue("doFireTick", "false");
@@ -121,8 +125,8 @@ public class StartCommand implements CommandExecutor {
 			public void run() {
 				for(int i = 0; i < chunk_perTick; i++) {	
 					if(chunks.isEmpty() || chunks.size() == 0) {
-						System.out.println("no more chunks so aborting");
-						System.out.println("will soon start trees planting");
+						log("No more chunks so aborting");
+						log("Will soon start trees planting");
 						new BukkitRunnable() {
 							@Override
 							public void run() {
@@ -141,7 +145,7 @@ public class StartCommand implements CommandExecutor {
 	}
 	
 	private void clearChunk(Chunk chunk) {
-		System.out.println("Clearing chunk x:" + chunk.getX() + " z:" + chunk.getZ() + "...");
+		debug("Clearing chunk x:" + chunk.getX() + " z:" + chunk.getZ() + "...");
 		player.teleport(new Location(Bukkit.getWorld(WORLD_NAME), chunk.getX(), 100, chunk.getZ()), TeleportCause.PLUGIN);
 		chunk.load(true);
 		new BukkitRunnable() {
@@ -161,7 +165,7 @@ public class StartCommand implements CommandExecutor {
 	}
 	
 	private void clearXZ(Chunk chunk, int x, int z) {
-		System.out.println("    -> Clearing x:" + x + " z:" + z);
+		debug("    -> Clearing x:" + x + " z:" + z);
 		List<Material> blockToStopOn = Arrays.asList(Material.STONE,
 				Material.DIRT,
 				Material.GRASS,
@@ -179,17 +183,17 @@ public class StartCommand implements CommandExecutor {
 		for(int y = Bukkit.getWorld(WORLD_NAME).getHighestBlockYAt(x, z) + 2; y > 55; y--) {
 			Block block = Bukkit.getWorld(WORLD_NAME).getBlockAt(x, y, z);
 			if(blockToStopOn.contains(block.getType())) {
-				System.out.println("stopped at the y:" + y + " because of a block to stop on was found");
+				debug("stopped at the y:" + y + " because of a block to stop on was found");
 				return;
 			} else {
-				System.out.println("cleared x:" + x + " y:" + y + " z:" + z);
+				debug("cleared x:" + x + " y:" + y + " z:" + z);
 				block.setType(Material.AIR);
 			}
 		}
 	}
 	
 	private void plantTrees() {
-		System.out.println("Starting trees plant");
+		log("Starting trees plant");
 		player.teleport(new Location(Bukkit.getWorld(WORLD_NAME), 0, 100, 0));
 		player.setGameMode(GameMode.SPECTATOR);
 		startPlantChunks();
@@ -203,7 +207,7 @@ public class StartCommand implements CommandExecutor {
 			public void run() {
 				for(int i = 0; i < chunk_perTick; i++) {	
 					if(treesChunks.isEmpty() || treesChunks.size() == 0) {
-						System.out.println("no more chunks to plant trees on so aborting");
+						log("No more chunks to plant trees on so aborting");
 						Bukkit.getWorld(WORLD_NAME).setGameRuleValue("randomTickSpeed", "3");
 						stats.setEndTime(System.currentTimeMillis());
 						for (Player opplayer : Bukkit.getOnlinePlayers()) {
@@ -232,7 +236,7 @@ public class StartCommand implements CommandExecutor {
 	private void plantChunk(Chunk chunk) {		
 		chunk.load(true);
 		boolean chunkplanted = false;
-		System.out.println("-> planting chunk x:" + chunk.getX() + " z:" + chunk.getZ());
+		debug("-> planting chunk x:" + chunk.getX() + " z:" + chunk.getZ());
 		for(int i = 0; i < 25; i++) {
 			int random = (int) Math.floor(Math.random() * 256);
 			int x = random / 16;
@@ -247,18 +251,18 @@ public class StartCommand implements CommandExecutor {
 			stats.increaseChunksPlanted();
 		}
 		chunk.unload();
-		System.out.println(" chunk planted !");
+		debug(" chunk planted !");
 	}
 	
 	private void plantXZ(Chunk chunk, int x, int z) {
-		System.out.println("   -> planting tree at x:" + x + " z:" + z);
+		debug("   -> planting tree at x:" + x + " z:" + z);
 		if(Bukkit.getWorld(WORLD_NAME).generateTree(
 				new Location(Bukkit.getWorld(WORLD_NAME),
 						x, Bukkit.getWorld(WORLD_NAME).getHighestBlockYAt(x, z), z),
 				TreeType.DARK_OAK)) {
 			stats.increaseTreesPlanted();
 		}
-		System.out.println("   -> tree has been planted");
+		debug("   -> tree has been planted");
 	}
 	
 	private void notifyPlayer() {
@@ -294,6 +298,16 @@ public class StartCommand implements CommandExecutor {
 				Title.sendActionBar(playerO, ChatColor.AQUA + "Temps passé: " + this.stats.getTimePassed() + "; " + message);
 			}
 		}
+	}
+	
+	private void debug(String sysout) {
+		if(DEBUG_MODE) {
+			System.out.println("[DEBUG] " + sysout);
+		}
+	}
+	
+	private void log(String sysout) {
+		System.out.println(sysout);
 	}
 	
 	private enum State {

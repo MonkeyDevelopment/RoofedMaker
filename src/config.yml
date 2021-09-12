@@ -1,4 +1,5 @@
 world_name: world
+debug_mode: false
 generation:
   #Those values wont normally crash your server but if it does you should decrease the values below
   #If you want task to be faster you can increase values as it fit to you
