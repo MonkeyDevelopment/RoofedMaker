@@ -17,6 +17,7 @@ This plugin helps you making a roofed forest with the length you want
 |Chunks to clear per tick\*|`3`|
 |Chunks to index per tick\*|`40`|
 |World Name\*|`world`| 
+|Debug Mode\*|`false`| 
 
  - Settings followed by a \* are manageable in the config.yml of the
    plugin.
