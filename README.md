@@ -26,8 +26,10 @@ This plugin helps you making a roofed forest with the length you want
 
 To start the roofed forest generation, run the following command:
 
-> /forestgen \<forest radius\>
+> /forestgen \<forest radius\> \<clear-village\>
 
 Forest radius is *optional*, but if given the clearing radius will be equal to te `<forest radius> + 50`; For example if the forest radius is `350` then the clearing radius will be `400`
+
+The clear-village option has to be added if you want the plugin to destroy any village seen.
 
  - **If you enjoyed the plugin you can leave a star ⭐️**
