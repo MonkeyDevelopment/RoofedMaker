@@ -37,6 +37,22 @@ public class StartCommand implements CommandExecutor {
 	private Player player;
 	private State state = State.NOT_STARTED;
 	private int toClear = 296;
+	private final List<Material> blockToStopOn = Arrays.asList(
+			//			Material.LOG,
+			//			Material.LOG_2,
+			Material.STONE,
+			Material.DIRT,
+			Material.GRASS,
+			Material.GRAVEL,
+			Material.SAND,
+			Material.SANDSTONE,
+			Material.IRON_ORE,
+			Material.COAL_ORE,
+			Material.CLAY,
+			Material.WATER,
+			Material.LAVA,
+			Material.STATIONARY_LAVA,
+			Material.STATIONARY_WATER);
 	
 	public StartCommand(Main main) {
 		this.main = main;
@@ -51,6 +67,21 @@ public class StartCommand implements CommandExecutor {
 			log("Forest's radius is now " + radius);
 			toClear = radius + 50;
 		}
+		boolean blocked = false;
+		if(args.length == 2 && args[1].equalsIgnoreCase("clear-village")) {
+			blocked = true;
+		}
+		if(!blocked) {
+			blockToStopOn.add(Material.WOOD_STAIRS);
+			blockToStopOn.add(Material.FENCE);
+			blockToStopOn.add(Material.WOOD);
+			blockToStopOn.add(Material.WOOL);
+			blockToStopOn.add(Material.WHEAT);
+			blockToStopOn.add(Material.COBBLESTONE);
+			blockToStopOn.add(Material.COBBLESTONE_STAIRS);
+			blockToStopOn.add(Material.LADDER);
+		}
+		
 		stats.setStartTime(System.currentTimeMillis());
 		this.state = State.STARTING;
 		clearMap();
@@ -165,21 +196,7 @@ public class StartCommand implements CommandExecutor {
 	}
 	
 	private void clearXZ(Chunk chunk, int x, int z) {
-		debug("    -> Clearing x:" + x + " z:" + z);
-		List<Material> blockToStopOn = Arrays.asList(Material.STONE,
-				Material.DIRT,
-				Material.GRASS,
-				Material.GRAVEL,
-				Material.SAND,
-				Material.SANDSTONE,
-				Material.IRON_ORE,
-				Material.COAL_ORE,
-				Material.CLAY,
-				Material.WATER,
-				Material.LAVA,
-				Material.STATIONARY_LAVA,
-				Material.STATIONARY_WATER);
-		
+		debug("    -> Clearing x:" + x + " z:" + z);		
 		for(int y = Bukkit.getWorld(WORLD_NAME).getHighestBlockYAt(x, z) + 2; y > 55; y--) {
 			Block block = Bukkit.getWorld(WORLD_NAME).getBlockAt(x, y, z);
 			if(blockToStopOn.contains(block.getType())) {
