@@ -37,25 +37,25 @@ public class StartCommand implements CommandExecutor {
 	private Player player;
 	private State state = State.NOT_STARTED;
 	private int toClear = 296;
-	private final List<Material> blockToStopOn = Arrays.asList(
-			//			Material.LOG,
-			//			Material.LOG_2,
-			Material.STONE,
-			Material.DIRT,
-			Material.GRASS,
-			Material.GRAVEL,
-			Material.SAND,
-			Material.SANDSTONE,
-			Material.IRON_ORE,
-			Material.COAL_ORE,
-			Material.CLAY,
-			Material.WATER,
-			Material.LAVA,
-			Material.STATIONARY_LAVA,
-			Material.STATIONARY_WATER);
+	private final List<Material> blockToStopOn = new ArrayList<Material>();
+	//			Material.LOG,
+	//			Material.LOG_2,
 	
 	public StartCommand(Main main) {
 		this.main = main;
+		blockToStopOn.add(Material.STONE);
+		blockToStopOn.add(Material.DIRT);
+		blockToStopOn.add(Material.GRASS);
+		blockToStopOn.add(Material.GRAVEL);
+		blockToStopOn.add(Material.SAND);
+		blockToStopOn.add(Material.SANDSTONE);
+		blockToStopOn.add(Material.IRON_ORE);
+		blockToStopOn.add(Material.COAL_ORE);
+		blockToStopOn.add(Material.CLAY);
+		blockToStopOn.add(Material.WATER);
+		blockToStopOn.add(Material.LAVA);
+		blockToStopOn.add(Material.STATIONARY_LAVA);
+		blockToStopOn.add(Material.STATIONARY_WATER);
 	}
 	
 	@Override
@@ -145,7 +145,7 @@ public class StartCommand implements CommandExecutor {
 		log("Loaded all chunks");
 	}
 	
-	private void startClearChunks() {
+	private void startClearChunks() {	
 		log("Started map clear !");
 		this.state = State.CLEARING;
 		Bukkit.getWorld(WORLD_NAME).setGameRuleValue("randomTickSpeed", "500");
@@ -155,7 +155,7 @@ public class StartCommand implements CommandExecutor {
 			@Override
 			public void run() {
 				for(int i = 0; i < chunk_perTick; i++) {	
-					if(chunks.isEmpty() || chunks.size() == 0) {
+					if(chunks.isEmpty()) {
 						log("No more chunks so aborting");
 						log("Will soon start trees planting");
 						new BukkitRunnable() {
@@ -167,9 +167,9 @@ public class StartCommand implements CommandExecutor {
 						cancel();
 						return;
 					}
-					clearChunk(chunks.get(i));
-					treesChunks.add(chunks.get(i));
-					chunks.remove(i);
+					clearChunk(chunks.get(0));
+					treesChunks.add(chunks.get(0));
+					chunks.remove(0);
 				}
 			}
 		}.runTaskTimer(StartCommand.this.main, 10, 1);
@@ -223,7 +223,7 @@ public class StartCommand implements CommandExecutor {
 			@Override
 			public void run() {
 				for(int i = 0; i < chunk_perTick; i++) {	
-					if(treesChunks.isEmpty() || treesChunks.size() == 0) {
+					if(treesChunks.isEmpty()) {
 						log("No more chunks to plant trees on so aborting");
 						Bukkit.getWorld(WORLD_NAME).setGameRuleValue("randomTickSpeed", "3");
 						stats.setEndTime(System.currentTimeMillis());
