@@ -16,6 +16,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import fr.thugmonkeymc.roofedmaker.main.Main;
@@ -36,10 +37,10 @@ public class StartCommand implements CommandExecutor {
 	private Stats stats = new Stats();
 	private Player player;
 	private State state = State.NOT_STARTED;
-	private int toClear = 296;
+	private int toClear = 296,
+			zMiddle = 0,
+			xMiddle = 0;
 	private final List<Material> blockToStopOn = new ArrayList<Material>();
-	//			Material.LOG,
-	//			Material.LOG_2,
 	
 	public StartCommand(Main main) {
 		this.main = main;
@@ -60,6 +61,15 @@ public class StartCommand implements CommandExecutor {
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		
+		Plugin pl = this.main.getServer().getPluginManager().getPlugin("WereWolfPlugin");
+		if(pl != null) {
+			io.github.ph1lou.werewolfplugin.Main ww = (io.github.ph1lou.werewolfplugin.Main) pl;
+			Location location = ww.getWereWolfAPI().getMapManager().getWorld().getSpawnLocation();
+			this.xMiddle = location.getBlockX();
+			this.zMiddle = location.getBlockZ();
+		}
+		
 		this.stats = new Stats();
 		log("Starting map clear...");
 		if(args.length == 1) {
@@ -84,7 +94,6 @@ public class StartCommand implements CommandExecutor {
 		
 		stats.setStartTime(System.currentTimeMillis());
 		this.state = State.STARTING;
-		clearMap();
 		
 		StartCommand.WORLD_NAME = this.main.getConfig().getString("world_name");
 		StartCommand.DEBUG_MODE = this.main.getConfig().getBoolean("debug_mode");
@@ -103,14 +112,15 @@ public class StartCommand implements CommandExecutor {
 			}
 		}.runTaskTimer(this.main, 0, 1);
 		
+		clearMap();
 		return true;
 	}
 	
 	private void clearMap() {
 		log("Stocking chunks start");
 		this.state = State.COUNTING;
-		for(int x = -toClear; x < toClear; x+=16) {
-			for(int z = -toClear; z < toClear; z+=16) {
+		for(int x = xMiddle - toClear; x < toClear; x+=16) {
+			for(int z = zMiddle - toClear; z < toClear; z+=16) {
 				debug("  added x:" + x + " z:" + z);
 				integersList.add(Arrays.asList(x, z));
 				totalChunks = integersList.size();
