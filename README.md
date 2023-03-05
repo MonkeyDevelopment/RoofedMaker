@@ -18,6 +18,7 @@ This plugin helps you making a roofed forest with the length you want
 |Chunks to index per tick\*|`40`|
 |World Name\*|`world`| 
 |Debug Mode\*|`false`| 
+|Change Biome\*|`true`| 
 
  - Settings followed by a \* are manageable in the config.yml of the
    plugin.
