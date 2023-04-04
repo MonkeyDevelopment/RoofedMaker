@@ -19,6 +19,7 @@ This plugin helps you making a roofed forest with the length you want
 |World Name\*|`world`| 
 |Debug Mode\*|`false`| 
 |Change Biome\*|`true`| 
+|Clear Space\*|`50`|
 
  - Settings followed by a \* are manageable in the config.yml of the
    plugin.
